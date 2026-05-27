@@ -6,7 +6,8 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/TanAI/',
+  // 本機開發用 '/'；推送到 GitHub Pages 專案站時改為 '/<repo-name>/'
+  base: process.env.GITHUB_ACTIONS ? '/eco-sensing-web/' : '/',
   plugins: [
     vue(),
     vueDevTools(),
