@@ -42,8 +42,11 @@ jobs:
       - name: Copy 404 fallback
         run: cp dist/index.html dist/404.html
         
+      # 若倉庫尚未啟用 GitHub Pages 或未改為 Actions 建置，預設會 404；enablement 會嘗試自動開啟
       - name: Setup Pages
         uses: actions/configure-pages@v4
+        with:
+          enablement: true
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
