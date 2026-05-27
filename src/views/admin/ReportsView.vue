@@ -1,5 +1,12 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
+import EsgReportDocument from '@/components/EsgReportDocument.vue'
+import {
+  buildMockEsgReport,
+  downloadReportHtml,
+  openReportPreviewTab,
+  printReportHtml,
+} from '@/utils/esgReport'
 
 const reportSummary = ref([
   { title: '可下載報告', value: '8', unit: '份' },
@@ -31,6 +38,8 @@ const employeeEnergyRaw = ref([
 
 const generatingReport = ref(false)
 const generateMessage = ref('')
+const currentReport = ref(null)
+const reportPreviewRef = ref(null)
 const years = [2020, 2021, 2022, 2023, 2024]
 const yearFrom = ref(2022)
 const yearTo = ref(2024)
@@ -111,37 +120,25 @@ const downloadChart = () => {
   img.src = url
 }
 
-const downloadMockPdf = (filename, lines) => {
-  const escapePdf = (s) => s.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)')
-  const textOps = lines.map((line, i) => `1 0 0 1 72 ${720 - i * 28} Tm (${escapePdf(line)}) Tj`).join('\n')
-  const stream = `BT\n/F1 14 Tf\n${textOps}\nET`
-  const streamLen = stream.length
-  const pdf = `%PDF-1.4
-1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
-2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
-3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<</Font<</F1<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>>>>>>>/Contents 4 0 R>>endobj
-4 0 obj<</Length ${streamLen}>>stream
-${stream}
-endstream
-endobj
-xref
-0 5
-0000000000 65535 f 
-0000000009 00000 n 
-0000000058 00000 n 
-0000000115 00000 n 
-0000000300 00000 n 
-trailer<</Size 5/Root 1 0 R>>
-startxref
-400
-%%EOF`
-  const blob = new Blob([pdf], { type: 'application/pdf' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
+const makeReport = () =>
+  buildMockEsgReport({
+    departmentRaw: departmentRaw.value,
+    yearFrom: yearFrom.value,
+    yearTo: yearTo.value,
+  })
+
+const scrollToReportPreview = async () => {
+  await nextTick()
+  reportPreviewRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+const downloadReportByRow = (row) => {
+  const mock = makeReport()
+  mock.title = row.name
+  mock.type = row.type
+  mock.date = row.date
+  downloadReportHtml(mock)
+  openReportPreviewTab(mock)
 }
 
 const generateEsgReport = async () => {
@@ -149,28 +146,30 @@ const generateEsgReport = async () => {
   generatingReport.value = true
   generateMessage.value = ''
   await new Promise((r) => setTimeout(r, 1500))
-  const today = new Date().toISOString().slice(0, 10)
-  const year = new Date().getFullYear()
+  const report = makeReport()
+  currentReport.value = report
   reports.value.unshift({
-    name: `ESG 永續報告（自動生成）${year}`,
-    type: 'ESG 報告',
-    date: today,
-    format: 'PDF'
+    name: report.title,
+    type: report.type,
+    date: report.date,
+    format: 'HTML',
+    reportId: report.id,
   })
   const summary = reportSummary.value.find((i) => i.title === '本月生成報告')
   if (summary) summary.value = String(Number(summary.value) + 1)
   const downloadable = reportSummary.value.find((i) => i.title === '可下載報告')
   if (downloadable) downloadable.value = String(Number(downloadable.value) + 1)
-  downloadMockPdf(`EcoSensing_ESG_Report_${year}.pdf`, [
-    'Eco Sensing ESG Sustainability Report',
-    `Generated: ${today}`,
-    'Scope 1-3 emissions summary (demo)',
-    'Department ranking & sensor status included',
-    'Compliant format preview - mock data'
-  ])
   generatingReport.value = false
-  generateMessage.value = `已生成 ${today} 版 ESG 永續報告並開始下載 PDF`
-  setTimeout(() => { generateMessage.value = '' }, 5000)
+
+  const tabOpened = openReportPreviewTab(report)
+  await scrollToReportPreview()
+
+  if (tabOpened) {
+    generateMessage.value = `已生成 ${report.date} 版報告：新分頁已開啟預覽，並於下方顯示完整內容`
+  } else {
+    generateMessage.value = `已生成 ${report.date} 版報告（請允許彈出視窗，或於下方檢視完整內容）`
+  }
+  setTimeout(() => { generateMessage.value = '' }, 8000)
 }
 </script>
 
@@ -192,6 +191,31 @@ const generateEsgReport = async () => {
       </button>
     </div>
     <p v-if="generateMessage" class="generate-msg">{{ generateMessage }}</p>
+
+    <!-- 生成的 ESG 報告（頁面內直接顯示） -->
+    <div v-if="currentReport" ref="reportPreviewRef" class="card generated-report-card">
+      <div class="generated-report-toolbar">
+        <div>
+          <h3 class="card-title">已生成的 ESG 永續報告</h3>
+          <p class="card-subtitle">示範資料 · {{ currentReport.generatedAt }}</p>
+        </div>
+        <div class="generated-report-actions">
+          <button type="button" class="report-action-btn" @click="openReportPreviewTab(currentReport)">
+            <span class="material-icons-outlined">open_in_new</span>
+            新分頁預覽
+          </button>
+          <button type="button" class="report-action-btn" @click="downloadReportHtml(currentReport)">
+            <span class="material-icons-outlined">download</span>
+            下載 HTML
+          </button>
+          <button type="button" class="report-action-btn primary" @click="printReportHtml(currentReport)">
+            <span class="material-icons-outlined">print</span>
+            列印 / 存 PDF
+          </button>
+        </div>
+      </div>
+      <EsgReportDocument :report="currentReport" />
+    </div>
 
     <!-- KPI Summary -->
     <div class="summary-grid">
@@ -394,7 +418,7 @@ const generateEsgReport = async () => {
             <td>{{ report.date }}</td>
             <td><span class="format-badge" :class="report.format.toLowerCase()">{{ report.format }}</span></td>
             <td>
-              <button class="download-btn">
+              <button class="download-btn" @click="downloadReportByRow(report)">
                 <span class="material-icons-outlined" style="font-size:15px;vertical-align:middle;">download</span>
                 下載
               </button>
@@ -403,6 +427,7 @@ const generateEsgReport = async () => {
         </tbody>
       </table>
     </div>
+
   </div>
 </template>
 
@@ -466,6 +491,56 @@ const generateEsgReport = async () => {
   padding: 10px 14px;
   background: var(--sb-green-light);
   border-radius: 10px;
+}
+
+.generated-report-card {
+  margin-bottom: 20px;
+  border: 2px solid var(--sb-green-light);
+  scroll-margin-top: 24px;
+}
+.generated-report-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.generated-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.report-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--sb-ceramic);
+  background: #fff;
+  color: var(--sb-green-brand);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+.report-action-btn .material-icons-outlined {
+  font-size: 18px;
+}
+.report-action-btn:hover {
+  border-color: var(--sb-green-accent);
+  background: var(--sb-green-light);
+}
+.report-action-btn.primary {
+  background: var(--sb-green-accent);
+  border-color: var(--sb-green-accent);
+  color: #fff;
+}
+.report-action-btn.primary:hover {
+  background: var(--sb-green-brand);
+  border-color: var(--sb-green-brand);
 }
 
 /* KPI */
@@ -734,5 +809,18 @@ const generateEsgReport = async () => {
   .year-range { margin-left: 0; }
   .summary-grid { grid-template-columns: 1fr; }
   .mini-track { width: 80px; }
+}
+
+@media (max-width: 640px) {
+  .generated-report-toolbar {
+    flex-direction: column;
+  }
+  .generated-report-actions {
+    width: 100%;
+  }
+  .report-action-btn {
+    flex: 1;
+    justify-content: center;
+  }
 }
 </style>
