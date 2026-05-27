@@ -135,8 +135,8 @@ const lastSyncTime = ref('剛剛')
         <div class="sync-banner-left">
           <span class="material-icons-outlined sync-icon">sync</span>
           <div class="sync-text">
-            <strong>資料來源：員工端即時同步</strong>
-            <p>範疇一～三排放由員工 App 自動匯入，無需人工催收單據</p>
+            <strong>資料來源：感測器即時同步</strong>
+            <p>範疇一～三排放由 IoT 感測器自動匯入，無需人工催收單據</p>
           </div>
         </div>
         <div class="sync-sources">

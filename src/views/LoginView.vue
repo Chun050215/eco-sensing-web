@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const selectedRole = ref('enterprise')
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
@@ -19,11 +18,7 @@ const handleLogin = async () => {
   loading.value = true
   await new Promise(r => setTimeout(r, 700))
   loading.value = false
-  if (selectedRole.value === 'employee') {
-    router.push('/employee/dashboard')
-  } else {
-    router.push('/admin/dashboard')
-  }
+  router.push('/admin/dashboard')
 }
 </script>
 
@@ -40,25 +35,7 @@ const handleLogin = async () => {
       </div>
 
       <h1 class="title">登入</h1>
-      <p class="subtitle">請選擇您的身份後登入</p>
-
-      <!-- 身份切換 -->
-      <div class="role-switch">
-        <button
-          class="role-btn"
-          :class="{ active: selectedRole === 'enterprise' }"
-          @click="selectedRole = 'enterprise'"
-        >
-          企業端
-        </button>
-        <button
-          class="role-btn"
-          :class="{ active: selectedRole === 'employee' }"
-          @click="selectedRole = 'employee'"
-        >
-          員工端
-        </button>
-      </div>
+      <p class="subtitle">請使用管理員帳號登入企業後台</p>
 
       <!-- 表單 -->
       <form @submit.prevent="handleLogin">
@@ -67,7 +44,7 @@ const handleLogin = async () => {
           <input
             v-model="username"
             type="text"
-            :placeholder="selectedRole === 'enterprise' ? '管理員帳號 / 電子郵件' : '員工編號 / Email'"
+            placeholder="管理員帳號 / 電子郵件"
             autocomplete="username"
           >
         </div>
@@ -167,38 +144,6 @@ const handleLogin = async () => {
   font-size: 14px;
   color: var(--sb-text-soft);
   margin: 0 0 24px;
-}
-
-/* Role switch */
-.role-switch {
-  display: flex;
-  background: var(--sb-ceramic);
-  border-radius: var(--sb-radius-pill);
-  padding: 4px;
-  gap: 4px;
-  margin-bottom: 24px;
-}
-.role-btn {
-  flex: 1;
-  padding: 9px 12px;
-  border: none;
-  border-radius: var(--sb-radius-pill);
-  background: transparent;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--sb-text-soft);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-.role-btn.active {
-  background: var(--sb-white);
-  color: var(--sb-green-brand);
-  font-weight: 600;
-  box-shadow: var(--sb-shadow-card);
-}
-.role-btn:active {
-  transform: scale(0.98);
 }
 
 /* Fields */

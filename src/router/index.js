@@ -61,37 +61,6 @@ const router = createRouter({
         },
       ]
     },
-    {
-      path: '/employee',
-      component: () => import('@/views/employee/EmployeeLayout.vue'),
-      redirect: '/employee/dashboard',
-      children: [
-        {
-          path: 'dashboard',
-          name: 'employee-dashboard',
-          component: () => import('@/views/employee/DashboardView.vue'),
-          meta: { title: '碳排儀錶板' }
-        },
-        {
-          path: 'actions',
-          name: 'employee-actions',
-          component: () => import('@/views/employee/ActionsView.vue'),
-          meta: { title: 'i減碳' }
-        },
-        {
-          path: 'leaderboard',
-          name: 'employee-leaderboard',
-          component: () => import('@/views/employee/LeaderboardView.vue'),
-          meta: { title: '部門排行榜' }
-        },
-        {
-          path: 'profile',
-          name: 'employee-profile',
-          component: () => import('@/views/employee/ProfileView.vue'),
-          meta: { title: '個人資料' }
-        },
-      ]
-    },
   ],
 })
 
