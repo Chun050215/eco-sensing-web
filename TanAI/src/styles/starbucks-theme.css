@@ -1,0 +1,122 @@
+/* Starbucks-inspired design tokens (see DESIGN.md) */
+:root {
+  --sb-green-brand: #006241;
+  --sb-green-accent: #00754a;
+  --sb-green-house: #1e3932;
+  --sb-green-uplift: #2b5148;
+  --sb-green-light: #d4e9e2;
+
+  --sb-gold: #cba258;
+  --sb-gold-light: #dfc49d;
+
+  --sb-canvas-warm: #f2f0eb;
+  --sb-ceramic: #edebe9;
+  --sb-white: #ffffff;
+  --sb-neutral-cool: #f9f9f9;
+
+  --sb-text: rgba(0, 0, 0, 0.87);
+  --sb-text-soft: rgba(0, 0, 0, 0.58);
+  --sb-text-white: #ffffff;
+  --sb-text-white-soft: rgba(255, 255, 255, 0.7);
+
+  --sb-red: #c82014;
+  --sb-green-success: #2b9f6b;
+  --sb-orange-warning: #b88200;
+
+  --sb-radius-card: 12px;
+  --sb-radius-pill: 50px;
+
+  --sb-shadow-card: 0 0 0.5px rgba(0, 0, 0, 0.14), 0 1px 1px rgba(0, 0, 0, 0.24);
+  --sb-shadow-nav: 0 1px 3px rgba(0, 0, 0, 0.1), 0 2px 2px rgba(0, 0, 0, 0.06),
+    0 0 2px rgba(0, 0, 0, 0.07);
+
+  --sb-chart-1: #00754a;
+  --sb-chart-2: #006241;
+  --sb-chart-3: #cba258;
+  --sb-chart-4: #2b5148;
+  --sb-chart-5: #d4e9e2;
+  --sb-chart-6: #1e3932;
+
+  letter-spacing: -0.01em;
+}
+
+/* Shared admin patterns */
+.admin-shell .card,
+.admin-page .card {
+  background: var(--sb-white);
+  border-radius: var(--sb-radius-card);
+  box-shadow: var(--sb-shadow-card);
+}
+
+.admin-shell .page-title,
+.admin-page .page-header h1 {
+  color: var(--sb-green-brand);
+  letter-spacing: -0.16px;
+}
+
+.admin-shell .card-title,
+.admin-page .card-title {
+  color: var(--sb-text);
+}
+
+.admin-shell .btn-primary,
+.admin-page .btn-primary {
+  background: var(--sb-green-accent);
+  color: var(--sb-white);
+  border-radius: var(--sb-radius-pill);
+  border: 1px solid var(--sb-green-accent);
+  transition: all 0.2s ease;
+}
+
+.admin-shell .btn-primary:active,
+.admin-page .btn-primary:active {
+  transform: scale(0.95);
+}
+
+.admin-shell .btn-primary:hover,
+.admin-page .btn-primary:hover {
+  background: var(--sb-green-brand);
+  border-color: var(--sb-green-brand);
+}
+
+.admin-page .page-header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--sb-green-brand);
+  letter-spacing: -0.16px;
+}
+
+.admin-page .page-header p,
+.admin-page .card-subtitle,
+.admin-page .summary-title {
+  color: var(--sb-text-soft);
+}
+
+.admin-page .card,
+.admin-page .summary-card,
+.admin-page .scope-card {
+  border-radius: var(--sb-radius-card);
+  box-shadow: var(--sb-shadow-card);
+}
+
+.admin-page .icon-btn,
+.admin-page .download-btn,
+.admin-page .toggle-btn.active {
+  border-radius: var(--sb-radius-pill);
+}
+
+.admin-page .icon-btn,
+.admin-page .download-btn {
+  background: var(--sb-green-accent);
+  transition: all 0.2s ease;
+}
+
+.admin-page .icon-btn:hover,
+.admin-page .download-btn:hover {
+  background: var(--sb-green-brand);
+}
+
+.admin-page .icon-btn:active,
+.admin-page .download-btn:active {
+  transform: scale(0.95);
+}
